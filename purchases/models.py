@@ -116,3 +116,12 @@ class PurchaseItem(models.Model):
     def line_total(self):
         """Return quantity multiplied by unit cost."""
         return self.quantity * self.unit_cost
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.purchase.update_total()
+
+    def delete(self, *args, **kwargs):
+        purchase = self.purchase
+        super().delete(*args, **kwargs)
+        purchase.update_total()

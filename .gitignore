@@ -1,9 +1,9 @@
 # Python
 __pycache__/
 *.py[cod]
-*.sqlite3
+*$py.class
 
-# Virtual Environment
+# Virtual environments
 venv/
 env/
 .venv/
@@ -11,17 +11,33 @@ env/
 # Environment variables
 .env
 
-# VS Code
-.vscode/
-
-# Mac
-.DS_Store
+# Django
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
 
 # Logs
 *.log
 
-# Static files collected
-staticfiles/
+# VS Code
+.vscode/
 
-# Database
-db.sqlite3
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+
+# Coverage / testing
+.coverage
+htmlcov/
+
+# Pytest cache
+.pytest_cache/
+
+# Migrations cache (not the migrations folder)
+*.pyc
