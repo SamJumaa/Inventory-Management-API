@@ -38,21 +38,23 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     # Third-party
-    'rest_framework',
-    'rest_framework.authtoken',
-    'django_filters',
-
+    "rest_framework",
+    "rest_framework.authtoken",
+    "django_filters",
+    "corsheaders",
     # Local apps
-    'accounts.apps.AccountsConfig',
-    'catalog.apps.CatalogConfig',
-    'inventory.apps.InventoryConfig',
-    'purchases.apps.PurchasesConfig',
-    'sales.apps.SalesConfig',
+    "accounts.apps.AccountsConfig",
+    "catalog.apps.CatalogConfig",
+    "inventory.apps.InventoryConfig",
+    "purchases.apps.PurchasesConfig",
+    "sales.apps.SalesConfig",
+    "companies.apps.CompaniesConfig",
+    "common.apps.CommonConfig",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -152,3 +154,5 @@ REST_FRAMEWORK = {
         "rest_framework.filters.OrderingFilter",
     ],
 }
+# CORS Configuration
+CORS_ALLOW_ALL_ORIGINS = True

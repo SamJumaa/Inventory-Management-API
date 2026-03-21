@@ -8,12 +8,21 @@ from .models import Category, Product
 
 class CategorySerializer(serializers.ModelSerializer):
     """Serializer for Category model."""
+
     product_count = serializers.SerializerMethodField()
 
     class Meta:
         """Meta options for CategorySerializer."""
+
         model = Category
-        fields = ["id", "name", "description", "product_count", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "name",
+            "description",
+            "product_count",
+            "created_at",
+            "updated_at",
+        ]
         read_only_fields = ["id", "product_count", "created_at", "updated_at"]
 
     def get_product_count(self, obj):
@@ -23,10 +32,12 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ProductListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for listing products."""
+
     category_name = serializers.CharField(source="category.name", read_only=True)
 
     class Meta:
         """Meta options for ProductListSerializer."""
+
         model = Product
         fields = [
             "id",
@@ -44,6 +55,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
 class ProductDetailSerializer(serializers.ModelSerializer):
     """Detailed serializer for product create/update/read."""
+
     category = CategorySerializer(read_only=True)
 
     # This is the IMPORTANT fix:
@@ -57,24 +69,22 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta options for ProductDetailSerializer."""
-        model = Product
-        fields = [
-            "id",
-            "name",
-            "sku",
-            "category",
-            "category_id",
-            "description",
-            "unit_price",
-            "reorder_level",
-            "is_active",
-            "created_at",
-            "updated_at",
-        ]
-        read_only_fields = ["id", "created_at", "updated_at"]
 
-    def validate_sku(self, value):
-        """ Ensure SKU is not empty and is uppercase."""
-        if not value or not value.strip():
-            raise serializers.ValidationError("SKU cannot be empty.")
-        return value.strip().upper()
+        model = Product
+        fields = "__all__"
+        read_only_fields = ("company", "created_by", "created_at", "updated_at")
+
+    def validate_category(self, value):
+        request = self.context.get("request")
+        user = request.user
+
+        if value is None:
+            return value
+
+        if not hasattr(user, "profile") or user.profile.company is None:
+            raise serializers.ValidationError("User is not assigned to a company.")
+
+        if value.company != user.profile.company:
+            raise serializers.ValidationError("Invalid category for this company.")
+
+        return value
