@@ -16,6 +16,7 @@ class UserBasicSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta options for UserBasicSerializer."""
+
         model = User
         fields = ["id", "username", "first_name", "last_name"]
         read_only_fields = ["id", "username", "first_name", "last_name"]
@@ -30,12 +31,12 @@ class StockMovementSerializer(serializers.ModelSerializer):
     product = ProductListSerializer(read_only=True)
     created_by = UserBasicSerializer(read_only=True)
     movement_type_display = serializers.CharField(
-        source="get_movement_type_display",
-        read_only=True
+        source="get_movement_type_display", read_only=True
     )
 
     class Meta:
         """Meta options for StockMovementSerializer."""
+
         model = StockMovement
         fields = [
             "id",
@@ -59,11 +60,14 @@ class StockSerializer(serializers.ModelSerializer):
     product = ProductListSerializer(read_only=True)
     product_id = serializers.IntegerField(read_only=True)
     sku = serializers.CharField(source="product.sku", read_only=True)
-    reorder_level = serializers.IntegerField(source="product.reorder_level", read_only=True)
+    reorder_level = serializers.IntegerField(
+        source="product.reorder_level", read_only=True
+    )
     is_low_stock = serializers.SerializerMethodField()
 
     class Meta:
         """Meta options for StockSerializer."""
+
         model = Stock
         fields = [
             "product_id",
@@ -144,17 +148,16 @@ class AdjustStockSerializer(serializers.Serializer):
         return data
 
     def save(self, user=None):
-        """
-        Perform stock adjustment and create StockMovement.
-        """
+        """Perform stock adjustment and create stock movement."""
+        request = self.context.get("request")
+        company = request.user.profile.company
 
-        product = Product.objects.get(  # type: ignore
-            id=self.validated_data["product_id"]
-        )
+        product = Product.objects.get(id=self.validated_data["product_id"])
 
-        stock, _ = Stock.objects.get_or_create(  # type: ignore
+        stock, _ = Stock.objects.get_or_create(
             product=product,
-            defaults={"quantity": 0},
+            company=company,
+            defaults={"quantity": 0, "created_by": user},
         )
 
         qty = self.validated_data["quantity"]
@@ -165,12 +168,12 @@ class AdjustStockSerializer(serializers.Serializer):
 
         with transaction.atomic():
 
-            StockMovement.objects.create(  # type: ignore
+            StockMovement.objects.create(
+                company=company,
                 product=product,
                 created_by=user,
                 movement_type=movement_type,
                 quantity=move_qty,
-                reference=None,
                 notes=f"[ADJUSTMENT] {notes}" if notes else "[ADJUSTMENT]",
             )
 
